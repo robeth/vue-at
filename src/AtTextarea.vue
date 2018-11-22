@@ -33,8 +33,9 @@ export default {
         if (index > -1) {
           const chunk = text.slice(index + at.length)
           const has = members.some(v => {
-            const name = itemName(v)
-            return deleteMatch(name, chunk, suffix)
+            // const name = itemName(v)
+            // return deleteMatch(name, chunk, suffix)
+            return deleteMatch(v, chunk, suffix)
           })
           if (has) {
             el.value = el.value.slice(0, index) +
@@ -66,7 +67,7 @@ export default {
         if (!allowSpaces && /\s/.test(chunk)) {
           show = false
         }
-      
+
         // chunk以空白字符开头不匹配 避免`@ `也匹配
         if (/^\s/.test(chunk)) show = false
         if (!show) {
@@ -77,8 +78,10 @@ export default {
             this.$emit('at', chunk)
           }
           const matched = members.filter(v => {
-            const name = itemName(v)
-            return filterMatch(name, chunk, at)
+            // comment revy
+            // const name = itemName(v)
+            // return filterMatch(name, chunk, at)
+            return filterMatch(v, chunk, at)
           })
           if (matched.length) {
             this.openPanel(matched, chunk, index, at, keep)
@@ -131,6 +134,12 @@ export default {
       el.selectionStart = start
       el.focus() // textarea必须focus回来
       const t = itemName(list[cur]) + suffix
+
+      this.selectedItem(list[cur], suffix);
+
+      console.log('masuk 1' + t);
+      console.log('masuk 2' + list[cur]);
+
       this.insertText(t, el)
       this.handleInput()
     }

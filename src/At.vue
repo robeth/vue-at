@@ -59,6 +59,16 @@ export default {
       default: (name, chunk, suffix) => {
         return chunk === name + suffix
       }
+    },
+    selectedItem: {
+      type: Function,
+      default: (item) => {
+
+      }
+    },
+    scrollRef: {
+      type: String,
+      default: ''
     }
   },
 
@@ -72,15 +82,17 @@ export default {
     atItems () {
       return this.at ? [this.at] : this.ats
     },
-    
+
     style () {
       if (this.atwho) {
         const { list, cur, x, y } = this.atwho
         const { wrap } = this.$refs
         if (wrap) {
           const offset = getOffset(wrap)
-          const left = x + window.pageXOffset - offset.left + 'px'
-          const top = y + window.pageYOffset - offset.top + 'px'
+          const scrollLeft = this.scrollRef ? document.querySelector(this.scrollRef).scrollLeft : 0
+          const scrollTop = this.scrollRef ? document.querySelector(this.scrollRef).scrollTop : 0
+          const left = x + scrollLeft + window.pageXOffset - offset.left + 'px'
+          const top = y + scrollTop + window.pageYOffset - offset.top + 'px'
           return { left, top }
         }
       }
@@ -127,8 +139,10 @@ export default {
         if (index > -1) {
           const chunk = text.slice(index + at.length)
           const has = members.some(v => {
-            const name = itemName(v)
-            return deleteMatch(name, chunk, suffix)
+            // comment revy
+            // const name = itemName(v)
+            // return deleteMatch(name, chunk, suffix)
+            return deleteMatch(v, chunk, suffix)
           })
           if (has) {
             e.preventDefault()
@@ -194,10 +208,10 @@ export default {
       const range = getPrecedingRange()
       if (range) {
         const { atItems, avoidEmail, allowSpaces } = this
-        
+
         let show = true
         const text = range.toString()
-  
+
         const { at, index } = getAtAndIndex(text, atItems)
 
         if (index < 0) show = false
@@ -214,7 +228,7 @@ export default {
         if (!allowSpaces && /\s/.test(chunk)) {
           show = false
         }
-      
+
         // chunk以空白字符开头不匹配 避免`@ `也匹配
         if (/^\s/.test(chunk)) show = false
 
@@ -222,12 +236,14 @@ export default {
           this.closePanel()
         } else {
           const { members, filterMatch, itemName } = this
-          if (!keep) {
+          if (!keep && chunk.length>0) {
             this.$emit('at', chunk)
           }
           const matched = members.filter(v => {
-            const name = itemName(v)
-            return filterMatch(name, chunk, at)
+            // comment revy
+            // const name = itemName(v)
+            // return filterMatch(name, chunk, at)
+            return filterMatch(v, chunk, at)
           })
           if (matched.length) {
             this.openPanel(matched, range, index, at)
@@ -321,6 +337,11 @@ export default {
       applyRange(r)
       applyRange(r)
       const t = itemName(list[cur]) + suffix
+
+      console.log('masuk 1' + t);
+      console.log('masuk 2' + list[cur]);
+
+      this.selectedItem(list[cur]);
       this.insertText(t, r)
       this.handleInput()
     }
